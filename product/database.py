@@ -1,31 +1,31 @@
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
-import os
 
-
-# Load env vars
+# Load environment variables
 load_dotenv()
 
-DB_USER = os.getenv("DB_USER")
-DB_PASSWORD = os.getenv("DB_PASSWORD")
-DB_HOST = os.getenv("DB_HOST")
-DB_PORT = os.getenv("DB_PORT")
-DB_NAME = os.getenv("DB_NAME")
+# DB configuration (Railway ke .env ke variables)
+DB_USER = os.getenv("MYSQL_USER", "root")
+DB_PASSWORD = os.getenv("MYSQL_PASSWORD", "password")
+DB_HOST = os.getenv("MYSQL_HOST", "localhost")
+DB_PORT = os.getenv("MYSQL_PORT", "3306")
+DB_NAME = os.getenv("MYSQL_DATABASE", "railway")
 
-# ✅ Construct MySQL URL correctly
 SQLALCHEMY_DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
-# Debug print (optional)
-print("Database URL:", SQLALCHEMY_DATABASE_URL)
-
-# ✅ Create engine and session
+# Engine creation
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
+
+# Session class
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+# Base class for models
 Base = declarative_base()
 
-# Dependency to get DB session
+# Dependency for FastAPI routes
 def get_db():
     db = SessionLocal()
     try:

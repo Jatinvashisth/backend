@@ -1,9 +1,0 @@
-fastapi
-sqlalchemy
-uvicorn
-pydantic
-passlib
-bcrypt
-python-jose
-pymysql
-start.sh
