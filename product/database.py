@@ -1,42 +1,35 @@
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
 import os
+from dotenv import load_dotenv
+import mysql.connector
+from mysql.connector import Error
 
-# Try both Railway and MySQL variable prefixes
-DB_USER = os.getenv("DB_USER") or os.getenv("MYSQL_USER")
-DB_PASSWORD = os.getenv("DB_PASSWORD") or os.getenv("MYSQL_PASSWORD")
-DB_HOST = os.getenv("DB_HOST") or os.getenv("MYSQL_HOST")
-DB_PORT = os.getenv("DB_PORT") or os.getenv("MYSQL_PORT")
-DB_NAME = os.getenv("DB_NAME") or os.getenv("MYSQL_DATABASE")
+# Load environment variables from .env file
+load_dotenv()
 
-# Validate all env vars
-missing = [k for k, v in {
-    "DB_USER": DB_USER,
-    "DB_PASSWORD": DB_PASSWORD,
-    "DB_HOST": DB_HOST,
-    "DB_PORT": DB_PORT,
-    "DB_NAME": DB_NAME
-}.items() if not v]
-
-if missing:
-    raise Exception(f"Database environment variables not set: {', '.join(missing)}")
-
-# Convert port to int safely
-DB_PORT = int(DB_PORT)
-
-# Build SQLAlchemy URL
-SQLALCHEMY_DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-
-# Initialize database engine and session
-engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=True, future=True)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
-
-# Dependency
-def get_db():
-    db = SessionLocal()
+def create_connection():
+    """Create and return a MySQL database connection."""
     try:
-        yield db
-    finally:
-        db.close()
+        connection = mysql.connector.connect(
+            host=os.getenv("MYSQL_HOST"),
+            user=os.getenv("MYSQL_USER"),
+            password=os.getenv("MYSQL_PASSWORD"),
+            database=os.getenv("MYSQL_DATABASE"),
+            port=os.getenv("MYSQL_PORT")
+        )
+        if connection.is_connected():
+            print("✅ Connected to MySQL Database")
+            return connection
+    except Error as e:
+        print(f"❌ Error connecting to MySQL: {e}")
+        return None
+
+# Optional: Test connection when running directly
+if __name__ == "__main__":
+    conn = create_connection()
+    if conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT DATABASE();")
+        record = cursor.fetchone()
+        print("📂 You're connected to database:", record)
+        cursor.close()
+        conn.close()
