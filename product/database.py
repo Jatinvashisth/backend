@@ -3,29 +3,37 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os
 
-# Read environment variables (matching your Railway setup)
-DB_USER = os.getenv("DB_USER")
-DB_PASSWORD = os.getenv("DB_PASSWORD")
-DB_HOST = os.getenv("DB_HOST")
-DB_PORT = os.getenv("DB_PORT")
-DB_NAME = os.getenv("DB_NAME")
+# Try both Railway and MySQL variable prefixes
+DB_USER = os.getenv("DB_USER") or os.getenv("MYSQL_USER")
+DB_PASSWORD = os.getenv("DB_PASSWORD") or os.getenv("MYSQL_PASSWORD")
+DB_HOST = os.getenv("DB_HOST") or os.getenv("MYSQL_HOST")
+DB_PORT = os.getenv("DB_PORT") or os.getenv("MYSQL_PORT")
+DB_NAME = os.getenv("DB_NAME") or os.getenv("MYSQL_DATABASE")
 
-# Check all variables exist
-if not all([DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, DB_NAME]):
-    raise Exception("Database environment variables are not properly set!")
+# Validate all env vars
+missing = [k for k, v in {
+    "DB_USER": DB_USER,
+    "DB_PASSWORD": DB_PASSWORD,
+    "DB_HOST": DB_HOST,
+    "DB_PORT": DB_PORT,
+    "DB_NAME": DB_NAME
+}.items() if not v]
 
-# Ensure port is integer
-DB_PORT = int(DB_PORT) if DB_PORT else 3306
+if missing:
+    raise Exception(f"Database environment variables not set: {', '.join(missing)}")
 
-# Connection URL
+# Convert port to int safely
+DB_PORT = int(DB_PORT)
+
+# Build SQLAlchemy URL
 SQLALCHEMY_DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
-# Engine & Session
+# Initialize database engine and session
 engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=True, future=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
-# Dependency for FastAPI routes
+# Dependency
 def get_db():
     db = SessionLocal()
     try:
