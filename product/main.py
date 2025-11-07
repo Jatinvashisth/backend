@@ -17,8 +17,8 @@ app.include_router(login.router)
 
 # Allowed origins for frontend
 origins = [
-    "http://localhost:5173",            # local React
-    "https://your-netlify-site.netlify.app",  # deployed frontend
+    "http://localhost:5173",                       # local React
+    "https://quiet-brigadeiros-c7bad7.netlify.app",  # live Netlify frontend
 ]
 
 # Add CORS middleware
