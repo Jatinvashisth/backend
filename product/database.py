@@ -3,22 +3,24 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os
 
-# Load environment variables
-MYSQL_DATABASE = os.getenv("MYSQL_DATABASE")
-MYSQL_USER = os.getenv("MYSQL_USER")
-MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
-MYSQL_HOST = os.getenv("MYSQL_HOST")
-MYSQL_PORT = os.getenv("MYSQL_PORT")
+# Read environment variables
+DB_USER = os.getenv("MYSQL_USER")
+DB_PASSWORD = os.getenv("MYSQL_PASSWORD")
+DB_HOST = os.getenv("MYSQL_HOST")
+DB_PORT = os.getenv("MYSQL_PORT")
+DB_NAME = os.getenv("MYSQL_DATABASE")
 
-# SQLAlchemy database URL
-SQLALCHEMY_DATABASE_URL = f"mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DATABASE}"
+# Make sure port is integer
+DB_PORT = int(DB_PORT) if DB_PORT else 3306
 
-# Create engine and session
+SQLALCHEMY_DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+
+# Engine & Session
 engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=True, future=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
-# Dependency to use in routers
+# Dependency
 def get_db():
     db = SessionLocal()
     try:
