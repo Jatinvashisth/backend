@@ -7,21 +7,19 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-# DB configuration
-DB_USER = os.getenv("MYSQL_USER")  # root
-DB_PASSWORD = os.getenv("MYSQL_PASSWORD")  # dINMlUvcICfUmbKhuMFeBjabuJOYtanm
-DB_HOST = os.getenv("MYSQL_HOST")  # mysql.railway.internal
-DB_PORT = os.getenv("MYSQL_PORT")  # 3306
-DB_NAME = os.getenv("MYSQL_DATABASE")  # railway
+DB_USER = os.getenv("MYSQL_USER")
+DB_PASSWORD = os.getenv("MYSQL_PASSWORD")
+DB_HOST = os.getenv("MYSQL_HOST")
+DB_PORT = os.getenv("MYSQL_PORT")
+DB_NAME = os.getenv("MYSQL_DATABASE")
 
 # SQLAlchemy connection URL
-SQLALCHEMY_DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}?charset=utf8mb4"
-
-
+SQLALCHEMY_DATABASE_URL = (
+    f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}?charset=utf8mb4"
+)
 
 # Engine creation
 engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=True, future=True)
-
 
 # Session class
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
