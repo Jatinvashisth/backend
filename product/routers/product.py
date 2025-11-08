@@ -1,90 +1,81 @@
-from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi import APIRouter, Depends, status, HTTPException, Response
 from typing import List
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from .. import models, schemas
 from ..database import get_db
-from product.routers.login import get_current_user
+from ..routers.login import get_current_user
 
 router = APIRouter(
-    prefix="/user",
-    tags=["User"]
+    prefix="/product",
+    tags=["Product"]
 )
 
-# ---------------- CREATE USER ----------------
-@router.post("/create", status_code=status.HTTP_201_CREATED)
-def create_user(request: schemas.UserData, db: Session = Depends(get_db)):
-    # Check if email already exists
-    existing_user = db.query(models.UserData).filter(models.UserData.email == request.email).first()
-    if existing_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
-
-    new_user = models.UserData(
+# ---------------- CREATE PRODUCT ----------------
+@router.post("/create", status_code=status.HTTP_201_CREATED, response_model=schemas.Product)
+def create_product(request: schemas.Product, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
+    new_product = models.Product(
         name=request.name,
-        email=request.email,
-        phone=request.phone,
-        address=request.address,
+        description=request.description,
+        price=request.price,
     )
-    db.add(new_user)
+    db.add(new_product)
     try:
         db.commit()
     except IntegrityError:
         db.rollback()
-        raise HTTPException(status_code=400, detail="Failed to create user due to duplicate entry")
-    db.refresh(new_user)
-    return new_user
+        raise HTTPException(status_code=400, detail="Failed to create product")
+    db.refresh(new_product)
+    return new_product
 
-# ---------------- GET ALL USERS ----------------
-@router.get("/all", response_model=List[schemas.UserData])
-def get_all_users(
-    db: Session = Depends(get_db),
-    current_user: schemas.UserData = Depends(get_current_user)
-):
-    users = db.query(models.UserData).all()
-    return users
+@router.options("/create")
+def create_product_options():
+    return Response()
 
-# ---------------- GET USER BY ID ----------------
-@router.get("/{id}", response_model=schemas.UserData)
-def get_user_by_id(id: int, db: Session = Depends(get_db)):
-    user = db.get(models.UserData, id)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    return user
+# ---------------- GET ALL PRODUCTS ----------------
+@router.get("/all", response_model=List[schemas.Product])
+def get_all_products(db: Session = Depends(get_db)):
+    products = db.query(models.Product).all()
+    return products
 
-# ---------------- GET USER BY EMAIL ----------------
-@router.get("/email/{email}", response_model=schemas.UserData)
-def get_user_by_email(email: str, db: Session = Depends(get_db)):
-    user = db.query(models.UserData).filter(models.UserData.email == email).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    return user
+# ---------------- GET PRODUCT BY ID ----------------
+@router.get("/{id}", response_model=schemas.Product)
+def get_product_by_id(id: int, db: Session = Depends(get_db)):
+    product = db.get(models.Product, id)
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    return product
 
-# ---------------- UPDATE USER ----------------
+# ---------------- UPDATE PRODUCT ----------------
 @router.put("/update/{id}")
-def update_user(id: int, updated_data: schemas.UserData, db: Session = Depends(get_db)):
-    user = db.get(models.UserData, id)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-
+def update_product(id: int, updated_data: schemas.Product, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
+    product = db.get(models.Product, id)
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
     for key, value in updated_data.model_dump().items():
-        setattr(user, key, value)
-
+        setattr(product, key, value)
     try:
         db.commit()
     except IntegrityError:
         db.rollback()
-        raise HTTPException(status_code=400, detail="Failed to update user: duplicate email?")
-    
-    db.refresh(user)
-    return {"message": "User updated successfully", "data": user}
+        raise HTTPException(status_code=400, detail="Failed to update product")
+    db.refresh(product)
+    return {"message": "Product updated successfully", "data": product}
 
-# ---------------- DELETE USER ----------------
+@router.options("/update/{id}")
+def update_product_options():
+    return Response()
+
+# ---------------- DELETE PRODUCT ----------------
 @router.delete("/delete/{id}")
-def delete_user(id: int, db: Session = Depends(get_db)):
-    user = db.get(models.UserData, id)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    db.delete(user)
+def delete_product(id: int, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
+    product = db.get(models.Product, id)
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    db.delete(product)
     db.commit()
-    return {"message": "User deleted successfully"}
+    return {"message": "Product deleted successfully"}
+
+@router.options("/delete/{id}")
+def delete_product_options():
+    return Response()

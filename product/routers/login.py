@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Response
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
@@ -13,12 +13,11 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
 router = APIRouter(tags=["Auth"])
 
-# ---------------- Generate Token Helper ----------------
+# ---------------- Generate Token ----------------
 def generate_token(data: dict):
-    """JWT token create karega email-based."""
     return jwt.encode(data, SECRET_KEY, algorithm=ALGORITHM)
 
-# ---------------- Login (JSON friendly) ----------------
+# ---------------- POST Login ----------------
 @router.post("/login", response_model=schemas.Token)
 def login(request: schemas.Login, db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.email == request.email).first()
@@ -27,9 +26,13 @@ def login(request: schemas.Login, db: Session = Depends(get_db)):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid email or password"
         )
-
     access_token = generate_token({"sub": user.email})
     return {"access_token": access_token, "token_type": "bearer"}
+
+# ---------------- OPTIONS Login (Preflight) ----------------
+@router.options("/login")
+def login_options():
+    return Response()
 
 # ---------------- Get Current User ----------------
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
@@ -38,7 +41,6 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         email: str = payload.get("sub")
