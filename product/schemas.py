@@ -1,45 +1,37 @@
 from pydantic import BaseModel, EmailStr
 from typing import Optional
 
-class UserData(BaseModel):
+class UserDataSchema(BaseModel):
     name: str
     email: EmailStr
-    phone: float
+    phone: str
     address: str
 
     class Config:
-        from_attributes = True  # ✅ for Pydantic v2 (replaces orm_mode
-
+        from_attributes = True  # Pydantic v2
 
 class DisplayUser(BaseModel):
     username: str
     email: EmailStr
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
-
-
-class User(BaseModel):
+class UserSchema(BaseModel):
     username: str
     email: EmailStr
     password: str
 
     class Config:
-        orm_mode = True
-
+        from_attributes = True
 
 class Login(BaseModel):
-    email : EmailStr
+    email: EmailStr
     password: str
-
-
-
 
 class Token(BaseModel):
     access_token: str
     token_type: str
 
-
 class TokenData(BaseModel):
-    email: Optional[str] = None    
+    email: Optional[str] = None
