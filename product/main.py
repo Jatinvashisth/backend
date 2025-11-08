@@ -4,29 +4,29 @@ from .database import engine
 from .routers import product, login, user
 from fastapi.middleware.cors import CORSMiddleware
 
-# ✅ Create DB tables
+#  Create DB tables
 models.Base.metadata.create_all(bind=engine)
 
-# ✅ Initialize FastAPI app
+#  Initialize FastAPI app
 app = FastAPI()
 
-# ✅ Allowed origins (Frontend URLs)
+# Allowed origins (Frontend URLs)
 origins = [
+     "https://vashisth1234.netlify.app",              # ✅ Your live Netlify
     "http://localhost:5173",                         # Local React
-    "https://vashisth1234.netlify.app",              # ✅ Your live Netlify
+   
 ]
 
-# ✅ Add CORS middleware (must come BEFORE routers)
+# Add CORS middleware (must come BEFORE routers)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],  # ✅ Explicit methods
+    allow_headers=["Content-Type", "Authorization"],            # ✅ Explicit headers
 )
 
-# ✅ Include routers (AFTER CORS setup)
+#  Include routers (AFTER CORS setup)
 app.include_router(product.router)
 app.include_router(user.router)
 app.include_router(login.router)
-# dvcjlksdnvjsnvsdnvn
