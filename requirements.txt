@@ -12,3 +12,5 @@ cryptography
 python-multipart
 alembic
 requests
+mysql-connector-python
+
