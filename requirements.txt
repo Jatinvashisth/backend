@@ -14,3 +14,4 @@ alembic
 requests
 mysql-connector-python
 
+
