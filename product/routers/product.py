@@ -9,6 +9,7 @@ from product.routers.login import get_current_user
 router = APIRouter(
     prefix="/user",
     tags=["User"]
+
 )
 
 # ---------------- CREATE USER ----------------

@@ -12,18 +12,17 @@ app = FastAPI(title="Backend API", version="1.0")
 
 # --- Allowed origins (frontend URLs) ---
 origins = [
-    "https://vashisth1234.netlify.app",   # ✅ Deployed Netlify frontend
-    "https://www.vashisth1234.netlify.app",  # (optional) Netlify "www" redirect case
-    "http://localhost:5173",              # ✅ Local dev (Vite/React)
+    "https://vashisth1234.netlify.app",  # Netlify frontend (no slash at end)
+    "http://localhost:5173",             # Local development (Vite/React)
 ]
 
 # --- CORS Middleware (MUST come before routers) ---
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,        # specify allowed origins
-    allow_credentials=True,       # allow cookies / auth headers
-    allow_methods=["*"],          # allow all HTTP methods (GET, POST, PUT, DELETE, etc.)
-    allow_headers=["*"],          # allow all headers (Content-Type, Authorization, etc.)
+    allow_origins=origins,           # specify allowed origins
+    allow_credentials=True,          # allow cookies / auth headers
+    allow_methods=["*"],             # allow all HTTP methods
+    allow_headers=["*"],             # allow all headers
 )
 
 # --- Include routers (AFTER middleware) ---
