@@ -4,33 +4,33 @@ from . import models
 from .database import engine
 from .routers import product, login, user
 
-# --- Create all database tables ---
+# --- Create all tables if they don't exist ---
 models.Base.metadata.create_all(bind=engine)
 
-# --- Initialize FastAPI app ---
+# --- Initialize FastAPI ---
 app = FastAPI(title="Backend API", version="1.0")
 
 # --- Allowed origins (frontend URLs) ---
 origins = [
-    "https://vashisth1234.netlify.app",  # Netlify frontend (no slash at end)
-    "http://localhost:5173",             # Local development (Vite/React)
+    "https://vashisth1234.netlify.app",
+    "http://localhost:5173",
 ]
 
-# --- CORS Middleware (MUST come before routers) ---
+# --- CORS middleware ---
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,           # specify allowed origins
-    allow_credentials=True,          # allow cookies / auth headers
-    allow_methods=["*"],             # allow all HTTP methods
-    allow_headers=["*"],             # allow all headers
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-# --- Include routers (AFTER middleware) ---
+# --- Include routers ---
 app.include_router(product.router)
 app.include_router(user.router)
 app.include_router(login.router)
 
-# --- Health check / CORS test route ---
+# --- Health check route ---
 @app.get("/ping")
 def ping():
     return {"message": "CORS setup working ✅"}

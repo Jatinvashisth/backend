@@ -3,7 +3,7 @@ version: "3.9"
 services:
   backend:
     build: .
-    restart: always
+    restart: always 
     environment:
       MYSQL_USER: root
       MYSQL_PASSWORD: dINMlUvcICfUmbKhuMFeBjabuJOYtanm
