@@ -1,16 +1,15 @@
 
-# 1️⃣ Build stage
 FROM python:3.12-slim AS builder
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y build-essential
+RUN apt-get update && apt-get install -y
 
 COPY requirements.txt .
 
 RUN pip install --user -r requirements.txt
 
-# 2️⃣ Final stage
+
 
 FROM python:3.12-slim
 

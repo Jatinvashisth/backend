@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from typing import List
 from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy import exc
 from .. import models, schemas
 from ..database import get_db
 from product.routers.login import get_current_user
@@ -12,7 +12,7 @@ router = APIRouter(
 
 )
 
-# ---------------- CREATE USER ----------------
+#  CREATE USER
 @router.post("/create", status_code=status.HTTP_201_CREATED)
 def create_user(request: schemas.UserData, db: Session = Depends(get_db)):
     # Check if email already exists
@@ -29,13 +29,13 @@ def create_user(request: schemas.UserData, db: Session = Depends(get_db)):
     db.add(new_user)
     try:
         db.commit()
-    except IntegrityError:
+    except exc.IntegrityError:
         db.rollback()
         raise HTTPException(status_code=400, detail="Failed to create user due to duplicate entry")
     db.refresh(new_user)
     return new_user
 
-# ---------------- GET ALL USERS ----------------
+#            GET ALL USERS 
 @router.get("/all", response_model=List[schemas.UserData])
 def get_all_users(
     db: Session = Depends(get_db),
@@ -44,7 +44,7 @@ def get_all_users(
     users = db.query(models.UserData).all()
     return users
 
-# ---------------- GET USER BY ID ----------------
+#  GET USER BY ID 
 @router.get("/{id}", response_model=schemas.UserData)
 def get_user_by_id(id: int, db: Session = Depends(get_db)):
     user = db.get(models.UserData, id)
@@ -52,7 +52,7 @@ def get_user_by_id(id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
-# ---------------- GET USER BY EMAIL ----------------
+# GET USER BY EMAIL 
 @router.get("/email/{email}", response_model=schemas.UserData)
 def get_user_by_email(email: str, db: Session = Depends(get_db)):
     user = db.query(models.UserData).filter(models.UserData.email == email).first()
@@ -60,7 +60,7 @@ def get_user_by_email(email: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
-# ---------------- UPDATE USER ----------------
+#  UPDATE USER 
 @router.put("/update/{id}")
 def update_user(id: int, updated_data: schemas.UserData, db: Session = Depends(get_db)):
     user = db.get(models.UserData, id)
@@ -72,14 +72,14 @@ def update_user(id: int, updated_data: schemas.UserData, db: Session = Depends(g
 
     try:
         db.commit()
-    except IntegrityError:
+    except exc.IntegrityError:
         db.rollback()
         raise HTTPException(status_code=400, detail="Failed to update user: duplicate email?")
     
     db.refresh(user)
     return {"message": "User updated successfully", "data": user}
 
-# ---------------- DELETE USER ----------------
+# DELETE USER 
 @router.delete("/delete/{id}")
 def delete_user(id: int, db: Session = Depends(get_db)):
     user = db.get(models.UserData, id)

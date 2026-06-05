@@ -1,36 +1,38 @@
+# backend/product/main.py
 from fastapi import FastAPI
+from product.routers import login, user
 from fastapi.middleware.cors import CORSMiddleware
-from . import models
-from .database import engine
-from .routers import product, login, user
+from product.database import Base, engine
+import time
+from sqlalchemy.exc import OperationalError
 
-# --- Create all tables if they don't exist ---
-models.Base.metadata.create_all(bind=engine)
+app = FastAPI()
 
-# --- Initialize FastAPI ---
-app = FastAPI(title="Backend API", version="1.0")
-
-# --- Allowed origins (frontend URLs) ---
-origins = [
-    "https://vashisth1234.netlify.app",
-    "http://localhost:5173",
-]
-
-# --- CORS middleware ---
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# --- Include routers ---
-app.include_router(product.router)
-app.include_router(user.router)
 app.include_router(login.router)
+app.include_router(user.router)
 
-# --- Health check route ---
+
+@app.on_event("startup")
+def startup():
+    # DB wait + retry (IMPORTANT for docker)
+    for i in range(10):
+        try:
+            Base.metadata.create_all(bind=engine)
+            print("DB Connected & Tables Created")
+            break
+        except OperationalError:
+            print("DB not ready, retrying...")
+            time.sleep(3)
+
+
 @app.get("/ping")
-def ping():
-    return {"message": "CORS setup working ✅"}
+def root():
+    return {"message": "FastAPI backend is running"}
