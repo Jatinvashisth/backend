@@ -13,6 +13,7 @@ app.add_middleware(
     allow_origins=[
                    "http://3.23.7.21:8000",
                    "http://frontend-2026-deploy.s3-website.us-east-2.amazonaws.com"
+                   
                    ],
     allow_credentials=True,
     allow_methods=["*"],
