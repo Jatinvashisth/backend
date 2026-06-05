@@ -11,6 +11,7 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
+        
                    "http://3.23.7.21:8000",
                    "http://frontend-2026-deploy.s3-website.us-east-2.amazonaws.com"
                    
