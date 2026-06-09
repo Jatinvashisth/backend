@@ -13,7 +13,7 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://frontend-2026-pro-242201306933-us-east-2-an.s3-website.us-east-2.amazonaws.com"
+        "https://bespoke-gumdrop-93fd17.netlify.app"
     ],
     allow_credentials=True,
     allow_methods=["*"],
