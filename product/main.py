@@ -1,24 +1,25 @@
 # backend/product/main.py
+
 from fastapi import FastAPI
-from product.routers import login, user
 from fastapi.middleware.cors import CORSMiddleware
+from product.routers import login, user
 from product.database import Base, engine
-import time
 from sqlalchemy.exc import OperationalError
+import time
 
 app = FastAPI()
 
+# ---------------- CORS SETUP ----------------
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-                   "http://frontend-2026-deploy.s3-website.us-east-2.amazonaws.com"
-                   
-                   
-                   ],
+        "http://frontend-2026-pro-242201306933-us-east-2-an.s3-website.us-east-2.amazonaws.com"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 app.include_router(login.router)
 app.include_router(user.router)
@@ -26,7 +27,6 @@ app.include_router(user.router)
 
 @app.on_event("startup")
 def startup():
-    # DB wait + retry (IMPORTANT for docker)
     for i in range(10):
         try:
             Base.metadata.create_all(bind=engine)
