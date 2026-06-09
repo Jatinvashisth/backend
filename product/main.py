@@ -13,13 +13,12 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "https://bespoke-gumdrop-93fd17.netlify.app"
+        "https://fascinating-truffle-5da5b6.netlify.app"
     ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 app.include_router(login.router)
 app.include_router(user.router)
