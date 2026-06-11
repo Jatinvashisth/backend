@@ -13,5 +13,6 @@ python-multipart
 alembic
 requests
 mysql-connector-python
+prometheus-client
 
 
